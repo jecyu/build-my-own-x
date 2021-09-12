@@ -1,0 +1,28 @@
+body {
+  height: 20000px;
+  background: linear-gradient(
+    rgba(0, 255, 191, 0.349),
+    rgba(251, 255, 0, 0.295)
+  );
+  margin: 0;
+}
+
+#backTop {
+  position: fixed;
+  right: 2rem;
+  bottom: 2rem;
+  z-index: 1000;
+}
+
+#backTop {
+  cursor: pointer;
+  border-top: 30px solid transparent;
+  border-bottom: 60px solid #3498db;
+  border-left: 30px solid transparent;
+  border-right: 30px solid transparent;
+  /* transition: 0.2s visibility; */
+}
+
+#backTop.hidden {
+  visibility: hidden;
+}
