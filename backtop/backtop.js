@@ -1,5 +1,5 @@
 (function (GLOBAL) {
-  function BackTop(el, options = {}) {
+  function BackTop(el, options = { duration: 500 }) {
     this.el = el;
     this.options = options;
     this.init();
@@ -32,7 +32,6 @@
   };
 
   BackTop.prototype.onScroll = function () {
-    // console.log("window.pageYOffset", window.pageYOffset);
     // 显示/隐藏 backTop 元素
     if (window.pageYOffset < 50) {
       // addClass()
@@ -44,7 +43,35 @@
   };
 
   BackTop.prototype.onClick = function () {
-    window.scrollTo(0, 0);
+    const { duration } = this.options;
+    const s = window.pageYOffset; // 获取距离目标位置的大小
+    this.animate({
+      duration,
+      timing(timeFraction) {
+        return timeFraction;
+      },
+      draw(progress) {
+        window.scrollTo(0, s - progress * s);
+      },
+    });
+  };
+
+  BackTop.prototype.animate = function ({ timing, draw, duration }) {
+    let start = performance.now();
+    requestAnimationFrame(function animate(time) {
+      // timeFraction 从 0 增加到 1
+      let timeFraction = (time - start) / duration;
+      if (timeFraction > 1) timeFraction = 1;
+
+      // 计算当前动画状态
+      let progress = timing(timeFraction);
+
+      draw(progress); // 绘制
+
+      if (timeFraction < 1) {
+        requestAnimationFrame(animate);
+      }
+    });
   };
 
   //AMD.
