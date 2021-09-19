@@ -1,0 +1,14 @@
+{
+  "name": "emitter",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "naluduo233 <jecyu.lin@gmail.com> (https://naluduo233.github.io/)",
+  "license": "MIT",
+  "scripts": {
+    "test:unit": "jest"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "jest": "^27.2.0"
+  }
+}
