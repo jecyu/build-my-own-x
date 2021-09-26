@@ -1,8 +1,8 @@
 (function (GLOBAL) {
   const util = {
     extend(target) {
-      for (var i = 1, len = arguments.length; i < len; i++) {
-        for (var prop in arguments[i]) {
+      for (let i = 1, len = arguments.length; i < len; i++) {
+        for (let prop in arguments[i]) {
           if (arguments[i].hasOwnProperty(prop)) {
             target[prop] = arguments[i][prop];
           }
