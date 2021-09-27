@@ -1,0 +1,30 @@
+ul,
+li {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-icon] {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-right: 5px;
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+[data-icon='open'] {
+  background-image: url('./assets/open.svg');
+}
+
+[data-icon][size='24'] {
+  width: 24px;
+  height: 24px;
+}
+
+[data-icon='close'] {
+  background-image: url('./assets/open.svg');
+}

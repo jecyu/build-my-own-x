@@ -26,6 +26,21 @@
       const originClass = el.className;
       return ` ${originClass} `.indexOf(` ${className} `) > -1;
     },
+    setStyle(element, style) {
+      const oldStyle = {};
+
+      const styleKeys = Object.keys(style);
+
+      styleKeys.forEach((key) => {
+        oldStyle[key] = element.style[key];
+      });
+
+      styleKeys.forEach((key) => {
+        element.style[key] = style[key];
+      });
+
+      return oldStyle;
+    },
   };
 
   function Tree(el, options) {
@@ -51,7 +66,8 @@
   Tree.prototype.renderTree = function (data) {
     const Tree = document.createElement('ul');
     let result = [];
-    for (let i = 0; i < data.length; i++) { // 多层嵌套渲染
+    for (let i = 0; i < data.length; i++) {
+      // 多层嵌套渲染
       if (!data[i].children) {
         result.push(this.renderTreeNode(data[i]));
       } else {
@@ -65,10 +81,25 @@
     return Tree;
   };
 
+  // Icon + title
+  Tree.prototype.renderSelector = function (data) {
+    // icon
+    const icon = document.createElement('i');
+    icon.setAttribute('data-icon', data.children ? 'open' : null);
+    // title
+    const title = document.createTextNode(data.label);
+
+    const selector = document.createElement('span');
+    selector.append(icon, title);
+    return selector;
+  };
+
   // 渲染树节点组件
   Tree.prototype.renderTreeNode = function (data) {
     let Node = document.createElement('li');
-    Node.innerHTML = data.label; // tree node
+    Node.append(this.renderSelector(data));
+    // 处理层级缩进, TODO 后续自动计算
+    util.setStyle(Node, { paddingLeft: `${18 * data.level - 1}px` });
     return Node;
   };
 
