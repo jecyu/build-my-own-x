@@ -1,0 +1,16 @@
+{
+  "name": "babel-plugin-log",
+  "version": "0.0.1",
+  "main": "index.js",
+  "author": "naluduo233 <jecyu.lin@gmail.com> (https://naluduo233.github.io/)",
+  "license": "MIT",
+  "scripts": {
+    "build": "node index.js"
+  },
+  "devDependencies": {
+    "@babel/generator": "^7.15.4",
+    "@babel/parser": "^7.15.7",
+    "@babel/traverse": "^7.15.4",
+    "@babel/types": "^7.15.6"
+  }
+}
