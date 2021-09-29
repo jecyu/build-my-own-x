@@ -6,6 +6,8 @@
 > 知乎：[前端工程师是如何迈向中高级阶段的?](https://www.zhihu.com/question/268828822/answer/342240595)
 
 - 纯原生 JavaScript 实现
+
+
 ## 目录
 
 ### 返回顶部
@@ -19,3 +21,15 @@ Demo：https://naluduo.vip/build-my-own-x/backtop/docs/basic/
 地址：https://github.com/naluduo233/build-my-own-x/tree/main/tree
 
 Demo：https://naluduo.vip/build-my-own-x/tree/docs/basic/
+
+### Emitter
+
+地址：https://github.com/naluduo233/build-my-own-x/emitter/main/tree
+
+Demo：https://naluduo.vip/build-my-own-x/emitter/test/emitter.test.js
+
+### Breadcrumb
+
+地址：https://github.com/naluduo233/build-my-own-x/breadcrumb/main/tree
+
+Demo：https://naluduo.vip/build-my-own-x/breadcrumb/docs/basic
