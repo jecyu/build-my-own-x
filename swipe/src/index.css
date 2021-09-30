@@ -1,0 +1,16 @@
+ul,
+li {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.swipe-item-wrapper {
+  display: flex;
+  border-bottom: 1px solid #ccc;
+  align-items: center;
+}
+.swipe-item-inner {
+  padding: 0 20px;
+  height: 80px;
+}
