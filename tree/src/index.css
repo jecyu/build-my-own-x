@@ -17,7 +17,7 @@ li {
 }
 
 [data-icon='open'] {
-  background-image: url('./assets/open.svg');
+  background-image: url('../assets/open.svg');
 }
 
 [data-icon][size='24'] {
@@ -26,5 +26,5 @@ li {
 }
 
 [data-icon='close'] {
-  background-image: url('./assets/open.svg');
+  background-image: url('../assets/open.svg');
 }
