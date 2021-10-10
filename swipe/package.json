@@ -1,0 +1,21 @@
+{
+  "name": "swipe",
+  "version": "0.0.1",
+  "main": "index.js",
+  "author": "naluduo233 <jecyu.lin@gmail.com> (https://naluduo233.github.io/)",
+  "license": "MIT",
+  "scripts": {
+    "build": "rollup -c",
+    "watch": "rollup -c -w",
+    "dev": "npm run watch & npm run start",
+    "start": "live-server docs"
+  },
+  "devDependencies": {
+    "live-server": "^1.2.1",
+    "postcss": "^8.3.9",
+    "rollup": "^2.58.0",
+    "rollup-plugin-postcss": "^4.0.1",
+    "rollup-plugin-terser": "^7.0.2",
+    "serve": "^12.0.1"
+  }
+}
