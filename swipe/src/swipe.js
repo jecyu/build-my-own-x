@@ -1,56 +1,10 @@
-import "./swipe.css"
-
-const util = {
-  extend(target) {
-    for (let i = 1, len = arguments.length; i < len; i++) {
-      for (let prop in arguments[i]) {
-        if (arguments[i].hasOwnProperty(prop)) {
-          target[prop] = arguments[i][prop]
-        }
-      }
-    }
-    return target
-  },
-  addClass(el, className) {
-    if (el.classList) {
-      el.classList.add(className)
-    } else {
-      if (!util.hasClass(el, className)) {
-        el.className = `${el.className} ${className}`
-      }
-    }
-  },
-  hasClass(el, className) {
-    if (el.classList) {
-      return el.classList.contains(className)
-    }
-    const originClass = el.className
-    return ` ${originClass} `.indexOf(` ${className} `) > -1
-  },
-  setStyle(element, style) {
-    const oldStyle = {}
-
-    const styleKeys = Object.keys(style)
-
-    styleKeys.forEach((key) => {
-      oldStyle[key] = element.style[key]
-    })
-
-    styleKeys.forEach((key) => {
-      element.style[key] = style[key]
-    })
-
-    return oldStyle
-  }
-}
-
-const STATE_SHRINK = 0
-const STATE_GROW = 1
-
+import SwipeItem from './swipe-item'
+import './swipe.css'
+import { addClass, extend, setStyle } from './util'
 function Swipe(el, options) {
   this.el = el
   this.refs = {}
-  this.options = util.extend({}, this.constructor.defaultOptions, options)
+  this.options = extend({}, this.constructor.defaultOptions, options)
   this.init()
   return this
 }
@@ -70,12 +24,12 @@ Swipe.prototype.render = function () {
 
 Swipe.prototype.renderSwiper = function () {
   const div = document.createElement('div')
-  util.addClass(div, 'nalu-swipe')
+  addClass(div, 'nalu-swipe')
   const ul = document.createElement('ul')
 
   const { data } = this.options
-  const result = data.map((item) => {
-    return this.renderSwiperItem(item)
+  const result = data.map((item, index) => {
+    return this.renderSwiperItem(item, index)
   })
   ul.append(...result)
   div.append(ul)
@@ -84,48 +38,9 @@ Swipe.prototype.renderSwiper = function () {
   return div
 }
 
-Swipe.prototype.renderSwiperItem = function (data) {
-  const { item, btns } = data
-  const swipeItemWrapper = document.createElement('li')
-  util.addClass(swipeItemWrapper, 'swipe-item-wrapper')
-
-  const swipeItem = document.createElement('div')
-  util.addClass(swipeItem, 'swipe-item')
-  swipeItem.setAttribute('data-type', 0)
-
-  // item-inner
-  const inner = document.createElement('div')
-  const span = document.createElement('span')
-  span.append(document.createTextNode(item.text))
-  inner.append(span)
-
-  util.addClass(inner, 'swipe-item-inner')
-  swipeItem.append(inner)
-
-  // btns
-  swipeItem.append(this.renderSwiperBtns(btns))
-
-  swipeItemWrapper.append(swipeItem)
-  return swipeItemWrapper
-}
-
-Swipe.prototype.renderSwiperBtns = function (btns) {
-  const ul = document.createElement('ul')
-  util.addClass(ul, 'swipe-btns')
-  const btnNodes = btns.map((btn) => {
-    const li = document.createElement('li')
-    util.addClass(li, 'swipe-btn')
-    const span = document.createElement('span')
-    util.addClass(span, 'text')
-    span.append(document.createTextNode(btn.text))
-
-    util.setStyle(li, { backgroundColor: btn.color })
-    li.append(span)
-    return li
-  })
-  ul.append(...btnNodes)
-
-  return ul
+Swipe.prototype.renderSwiperItem = function (data, index) {
+  const swipeItem = new SwipeItem({ ...data, index })
+  return swipeItem.init()
 }
 
 Swipe.prototype.bind = function () {
@@ -177,12 +92,13 @@ Swipe.prototype.onTouchMove = function (e) {
   // const point = e.touches[0]
   // this.endX = point.pageX
   // const deltaX = this.startX - this.endX
-  // util.setStyle(target, { transform: `translate3d(${-deltaX}px, 0, 0)` })
+  // setStyle(target, { transform: `translate3d(${-deltaX}px, 0, 0)` })
 }
 
 Swipe.prototype.onTouchEnd = function (e) {
   const target = this.getTouchTarget(e)
   if (!target.classList.contains('swipe-item')) return
+
   const point = e.changedTouches[0]
   this.endX = point.pageX
   const delatX = this.startX - this.endX
