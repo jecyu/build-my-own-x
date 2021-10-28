@@ -1,3 +1,5 @@
+import SwipeStore from './swipe-store'
+
 import SwipeItem from './swipe-item'
 import './swipe.css'
 import { addClass, extend, setStyle } from './util'
@@ -12,10 +14,25 @@ function Swipe(el, options) {
 Swipe.defaultOptions = {}
 
 Swipe.prototype.init = function () {
+  this.swipeStore = new SwipeStore({ swipe: this })
+  this.items = [] // 收集 swipe-item 实例
+  this.activeIndex = -1 // 当前激活的 item
   this.render()
   this.bind()
   return this
 }
+
+Swipe.prototype.unbind = function () {}
+
+Swipe.prototype.destroy = function () {
+  this.unbind()
+  return this
+}
+
+/**
+ * 如果父元素中有已经被触摸左滑展开的swipe-item记录 并且和这个新的swipe-item不是同一个 就通知上一个子组件shrink() 收起， 并且在swipe组件中记录this.activeIndex = index新的子组件序号
+ */
+Swipe.prototype.onItemActive = function (index) {}
 
 // 渲染视图
 Swipe.prototype.render = function () {
@@ -39,84 +56,18 @@ Swipe.prototype.renderSwiper = function () {
 }
 
 Swipe.prototype.renderSwiperItem = function (data, index) {
-  const swipeItem = new SwipeItem({ ...data, index })
+  const { swipeStore } = this
+  const swipeItem = new SwipeItem({ ...data, index, swipeStore })
   return swipeItem.init()
 }
 
 Swipe.prototype.bind = function () {
-  this.refs.swipe.addEventListener(
-    'touchstart',
-    this.onTouchStart.bind(this),
-    false
-  )
-  this.refs.swipe.addEventListener(
-    'touchmove',
-    this.onTouchMove.bind(this),
-    false
-  )
-  this.refs.swipe.addEventListener(
-    'touchend',
-    this.onTouchEnd.bind(this),
-    false
-  )
   return this
 }
 
-Swipe.prototype.unbind = function () {}
-
-Swipe.prototype.destroy = function () {
-  this.unbind()
-  return this
+Swipe.prototype.addItem = function (item) {
+  this.items.push(item)
 }
-
-Swipe.prototype.getTouchTarget = function (e) {
-  let target = e.target
-  while (target && !target.classList.contains('swipe-item')) {
-    target = target.parentElement
-  }
-  return target
-}
-
-Swipe.prototype.onTouchStart = function (e) {
-  const target = this.getTouchTarget(e)
-  if (!target.classList.contains('swipe-item')) return
-
-  const point = e.touches[0]
-  this.startX = point.pageX
-}
-
-Swipe.prototype.onTouchMove = function (e) {
-  // e.preventDefault()
-  // const target = this.getTouchTarget(e)
-  // if (!target.classList.contains('swipe-item')) return
-  // const point = e.touches[0]
-  // this.endX = point.pageX
-  // const deltaX = this.startX - this.endX
-  // setStyle(target, { transform: `translate3d(${-deltaX}px, 0, 0)` })
-}
-
-Swipe.prototype.onTouchEnd = function (e) {
-  const target = this.getTouchTarget(e)
-  if (!target.classList.contains('swipe-item')) return
-
-  const point = e.changedTouches[0]
-  this.endX = point.pageX
-  const delatX = this.startX - this.endX
-  // 左滑
-  if (target.dataset.type == 0 && delatX > 30) {
-    this.restSlide()
-    target.dataset.type = 1
-  }
-  // 右滑
-  if (target.dataset.type == 1 && delatX < -30) {
-    this.restSlide()
-    target.dataset.type = 0
-  }
-  this.startX = 0
-  this.endX = 0
-}
-
-Swipe.prototype._translate = function () {}
 
 //复位滑动状态
 Swipe.prototype.restSlide = function () {
