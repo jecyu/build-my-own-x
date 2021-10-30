@@ -137,6 +137,8 @@
   const DIRECTION_LEFT = 1;
   const DIRECTION_RIGHT = -1;
   const EVENT_SCROLL = 'scroll';
+  const easingTime = 600;
+  const easeOutQuart = 'cubic-bezier(0.165, 0.84, 0.44, 1)';
 
   /**
    * {item, btns, index, autoShrink}
@@ -177,6 +179,7 @@
     this.onTouchMove = this.onTouchMove.bind(this); // 记录绑定后的函数，方便卸载
     this.onTouchEnd = this.onTouchEnd.bind(this);
     this._handleBtns = this._handleBtns.bind(this);
+    this._translateBtns = this._translateBtns.bind(this);
 
     this.refs.swipeItem.addEventListener('touchstart', this.onTouchStart, false);
 
@@ -239,23 +242,62 @@
   };
 
   /**
-   * 动态处理按钮的位置
-   * 让多个按钮正常排在 item 后面，而不是叠加在一起，初始化的时候，要对每个 btn 进行 transform 移动 x 位置。
+   * 根据当前的x值驱动每个按钮去做向左滑动动画，动态处理按钮的位置
+   * grow：要实现刚开始向左移动 swipe-item 时，每个按钮都是重叠在一起的，然后根据 swipe-item 移动的 x ，每个按钮慢慢通过 translate 移动到合适的位置，最终达到每个按钮并排一起。这样很多按钮时，用户也能够快速预览下。
+   * shrink：收缩时，逐步移动 btn 向右移动 translate 效果即可。
+   * 然后在 grow 和 shrink 的临界点通过 _translateBtns 矫正每个按钮的位置，因为 handleBtns 处理 translate 时，有可能中途缩开，这样每个按钮移动的点就不是达到并排（grow时）的效果，会有间隔。
    * 每个 btn 的初始化位置为，由于样式上统一设置了 left：100%，会跟随在 item 后面。那么依次后面的每个 btn的移动位置，都向右前面 n - 1 个按钮相加的宽度
-   * @param {*} x 
-   * @returns 
+   * @param {*} x
+   * @returns
    */
-  SwipeItem.prototype._handleBtns = function(x) {
+  SwipeItem.prototype._handleBtns = function (x) {
     if (this.refs.btns.length === 0) {
       return
     }
     const len = this.refs.btns.length;
     let delta = 0;
+    let totalWidth = -this.maxScrollX;
     for (let i = 0; i < len; i++) {
       const btn = this.refs.btns[i];
-      const translate = delta;
-      btn.style['transform'] = `translate(${translate}px)`;
+      let rate = (totalWidth - delta) / totalWidth; // 1. 得出当前按钮向左移动的比率，通过总宽度 - 排在前面的按钮宽度总和，再除以总宽度得到剩下的按钮所占的比例。
+      let translate = (rate - 1) * x; // 2. 再通过 1 - rate 得出当前按钮向左移动的比例即为前面按钮的宽度比例，这样就保证越往后的按钮，translate 移动的比例越大，保证所有按钮能够同时出现
+
+      if (x < this.maxScrollX) {
+        // 大于最大移动距离时，直接并排好，在 grow 和 shrink 则由 _translateBtn 处理
+        translate = delta;
+      }
+
       delta += this.cachedBtns[i].width;
+      btn.style['transform'] = `translate(${translate}px)`;
+    }
+  };
+
+  /**
+   * 遍历btn组的dom节点，
+   * 给按钮也设置一系列css transform 让按钮一个个做对应的动画
+   */
+  SwipeItem.prototype._translateBtns = function (time, easing) {
+    // 如果没有 btns 就什么也不做
+    if (this.refs.btns.length === 0) {
+      return
+    }
+
+    const len = this.refs.btns.length;
+    let delta = 0;
+    let translate = 0;
+    for (let i = 0; i < len; i++) {
+      const btn = this.refs.btns[i];
+      if (this.state === STATE_GROW) {
+        translate = delta;
+      } else {
+        // shrink
+        translate = 0;
+      }
+      delta += this.cachedBtns[i].width;
+      btn.style.transform = `translate(${translate}px, 0) translateZ(0)`;
+      btn.style.transitionProperty = 'all';
+      btn.style.transitionTimingFunction = easing;
+      btn.style.transitionDuration = time;
     }
   };
 
@@ -329,11 +371,14 @@
     this.state = STATE_GROW;
     // 调用 scrollTo，值定义为完全展开的值
     this.scrollTo(this.maxScrollX);
+    // 调用_translateBtns让按钮组做动画
+    this._translateBtns(easingTime, easeOutQuart);
   };
 
   SwipeItem.prototype.shrink = function () {
     this.state = STATE_SHRINK;
     this._translate(0, true);
+    this._translateBtns(easingTime, easeOutQuart);
   };
 
   SwipeItem.prototype.scrollTo = function (x) {
