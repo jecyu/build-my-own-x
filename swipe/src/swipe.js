@@ -69,13 +69,4 @@ Swipe.prototype.addItem = function (item) {
   this.items.push(item)
 }
 
-//复位滑动状态
-Swipe.prototype.restSlide = function () {
-  let swiperItems = document.querySelectorAll('.swipe-item')
-  // 复位
-  for (let i = 0; i < swiperItems.length; i++) {
-    swiperItems[i].dataset.type = 0
-  }
-}
-
 export default Swipe

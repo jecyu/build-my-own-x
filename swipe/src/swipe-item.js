@@ -1,9 +1,11 @@
+import Emitter from "./emitter"
 import { addClass, extend, setStyle, getRect } from './util'
 
 const STATE_SHRINK = 0
 const STATE_GROW = 1
 const DIRECTION_LEFT = 1
 const DIRECTION_RIGHT = -1
+const EVENT_SCROLL = 'scroll'
 
 /**
  * {item, btns, index, autoShrink}
@@ -21,6 +23,7 @@ function SwipeItem(options) {
   this.maxScrollX = 0 // 向左滑动的最大距离
   this.movingDirectionX = 0 // 手指滑动方向
 
+  Emitter(this) // 添加 emitter 能力
   const { swipeStore } = this.options
   swipeStore.swipe.addItem(this) // 调用父组件的 addItem 方法把自身实例 push 到父组件的 this.items 数组里收集起来
 }
@@ -42,12 +45,14 @@ SwipeItem.prototype.bind = function () {
   this.onTouchStart = this.onTouchStart.bind(this)
   this.onTouchMove = this.onTouchMove.bind(this) // 记录绑定后的函数，方便卸载
   this.onTouchEnd = this.onTouchEnd.bind(this)
+  this._handleBtns = this._handleBtns.bind(this)
 
   this.refs.swipeItem.addEventListener('touchstart', this.onTouchStart, false)
 
   this.refs.swipeItem.addEventListener('touchmove', this.onTouchMove, false)
 
   this.refs.swipeItem.addEventListener('touchend', this.onTouchEnd, false)
+  this.on(EVENT_SCROLL, this._handleBtns);
 }
 
 SwipeItem.prototype.unbind = function () {
@@ -102,6 +107,27 @@ SwipeItem.prototype._calculateBtnsWidth = function () {
   this.maxScrollX = -width
 }
 
+/**
+ * 动态处理按钮的位置
+ * 让多个按钮正常排在 item 后面，而不是叠加在一起，初始化的时候，要对每个 btn 进行 transform 移动 x 位置。
+ * 每个 btn 的初始化位置为，由于样式上统一设置了 left：100%，会跟随在 item 后面。那么依次后面的每个 btn的移动位置，都向右前面 n - 1 个按钮相加的宽度
+ * @param {*} x 
+ * @returns 
+ */
+SwipeItem.prototype._handleBtns = function(x) {
+  if (this.refs.btns.length === 0) {
+    return
+  }
+  const len = this.refs.btns.length
+  let delta = 0
+  for (let i = 0; i < len; i++) {
+    const btn = this.refs.btns[i]
+    const translate = delta
+    btn.style['transform'] = `translate(${translate}px)`
+    delta += this.cachedBtns[i].width
+  }
+}
+
 SwipeItem.prototype.onTouchStart = function (e) {
   this.options.swipeStore.swipe.onItemActive(this.options.index) // 首先通知父组件“我被触摸了”， 这里调用父 swipe 组件的 onItemActive
 
@@ -143,6 +169,9 @@ SwipeItem.prototype.onTouchMove = function (e) {
 
   // 调用_translate 真正去操作dom左偏移的行为
   this._translate(newX, true)
+
+  // 触发EVENT_SCROLL事件 带出当前的x值。
+  this.emit(EVENT_SCROLL, this.x)
 }
 
 SwipeItem.prototype.onTouchEnd = function (e) {
@@ -202,10 +231,7 @@ SwipeItem.prototype.renderSwiperBtns = function (btns) {
 
 SwipeItem.prototype.render = function () {
   const { item, btns } = this.options
-  const swipeItemWrapper = document.createElement('li')
-  addClass(swipeItemWrapper, 'swipe-item-wrapper')
-
-  const swipeItem = document.createElement('div')
+  const swipeItem = document.createElement('li')
   addClass(swipeItem, 'swipe-item')
   swipeItem.setAttribute('data-type', 0)
 
@@ -220,9 +246,8 @@ SwipeItem.prototype.render = function () {
 
   // btns
   swipeItem.append(this.renderSwiperBtns(btns))
-  swipeItemWrapper.append(swipeItem)
 
-  return swipeItemWrapper
+  return swipeItem
 }
 
 export default SwipeItem
