@@ -1,0 +1,11 @@
+{
+  "name": "gen-share-image",
+  "version": "0.0.1",
+  "main": "index.js",
+  "author": "naluduo233 <jecyu.lin@gmail.com> (https://naluduo233.github.io/)",
+  "license": "MIT",
+  "dependencies": {
+    "sharp": "^0.29.3",
+    "text-to-svg": "^3.1.5"
+  }
+}
